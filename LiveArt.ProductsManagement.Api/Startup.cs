@@ -2,9 +2,13 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using LiveArt.ProductsManagement.Api.Services;
+using LiveArt.ProductsManagement.Domain.Contracts.Repositories;
+using LiveArt.ProductsManagement.Domain.Contracts.Services;
+using LiveArt.ProductsManagement.Domain.Entities;
+using LiveArt.ProductsManagement.Domain.Repositories;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.HttpsPolicy;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -26,6 +30,23 @@ namespace LiveArt.ProductsManagement.Api
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
+            services.AddCors(options =>
+            {
+                options.AddPolicy("AllowAnyOrigin",
+                    builder => builder.AllowAnyOrigin().AllowAnyHeader().AllowAnyMethod());
+            });
+
+            //services.AddCors(options =>
+            //{
+            //    options.AddPolicy("AllowMyOrigin",
+            //        builder => builder.WithOrigins("http://localhost:8080"));
+            //});
+
+            services.AddSingleton(Configuration);
+            services.AddSingleton<IConnectionStringProvider, ConnectionStringProvider>();
+            services.AddTransient<IRepositoryBase<Product>, ProductRepository>();
+            services.AddTransient<ICommentRepository, CommentRepository>();
+            
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -40,7 +61,6 @@ namespace LiveArt.ProductsManagement.Api
                 app.UseHsts();
             }
 
-            app.UseHttpsRedirection();
             app.UseMvc();
         }
     }
